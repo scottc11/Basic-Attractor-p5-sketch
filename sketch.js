@@ -13,30 +13,34 @@ function setup() {
 
   // getting the direction from obj1 to obj2
   var force = p5.Vector.sub(obj1.location, obj2.location);
-  console.log(force);
+  // console.log(force);
   // getting the distance between two objects (one number)
   var distance = force.mag();
-  console.log("Distance: " + distance);
+  // console.log("Distance: " + distance);
   var magnitude = (gravConst * obj1.size * obj2.size) / (distance * distance);
-  console.log("Magnitude: " + magnitude);
+  // console.log("Magnitude: " + magnitude);
   force.normalize();
-  console.log("normailized force: " + force);
+  // console.log("normailized force: " + force);
   force.mult(magnitude);
-  console.log("END GAME: " + force);
-  console.log("class: " + attractor.attract(obj2));
+  // console.log("END GAME: " + force);
+  // console.log("class: " + attractor.attract(obj2));
 
 }
 
 function draw() {
   background(0);
+  attractor.location.x = mouseX;
+  attractor.location.y = mouseY;
   attractor.draw();
   obj1.draw();
   obj2.draw();
 
-  var force = attractor.attract(obj1);
-  obj1.applyForce(force);
+  var force1 = attractor.attract(obj1);
+  var force2 = attractor.attract(obj2);
+  obj1.applyForce(force1);
   obj1.update();
-
+  obj2.applyForce(force2);
+  obj2.update();
 }
 
 //MOVER CLASS
@@ -76,6 +80,8 @@ function Attractor(_locX, _locY, _size) {
   this.attract = function(obj) {
     var forceDirection = p5.Vector.sub(this.location, obj.location);
     var distance = forceDirection.mag();
+    distance = constrain(distance, 40, 300);
+
 
     forceDirection.normalize();
     // below is the equation for calculating the gravitational force of an object
