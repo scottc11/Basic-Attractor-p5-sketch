@@ -33,13 +33,22 @@ function draw() {
 
   // updating the particles
   for (var i = 0; i < particleArray.length; i++) {
+    var particle = particleArray[i];
 
-    particleArray[i].draw();
-    var force = attractor.attract(particleArray[i]);
-    particleArray[i].applyForce(force);
-    particleArray[i].update();
+    // attract object if it is in given range of attractor
+    if (particle.getDistanceFromAttractor(attractor) < attractor.range) {
+      var force = attractor.attract(particle);
+      particle.applyForce(force);
+      particle.update();
+      particle.draw();
+    }
+
+    if (particle.getDistanceFromAttractor(attractor) > attractor.range) {
+      particle.returnToOrigin();
+      particle.update();
+      particle.draw();
+    }
   }
-
 }
 
 
@@ -54,7 +63,9 @@ function Particle(_locX, _locY, _size, _name) {
   this.location = new p5.Vector(_locX, _locY);
   this.origin = new p5.Vector(_locX, _locY);
   this.velocity = new p5.Vector(0.0, 0.0);
+  this.acceleration = new p5.Vector(0.0, 0.0);
   this.size = _size;
+  this.topSpeed = 10;
 
   this.draw = function() {
     fill(255);
@@ -66,19 +77,24 @@ function Particle(_locX, _locY, _size, _name) {
     this.velocity = force;
   }
 
-  this.returnToOrigin = function() {
-    // Force calculations
-    var forceDirection = p5.Vector.sub(this.origin, this.location);
+  this.getDistanceFromAttractor = function(attractor) {
+    var forceDirection = p5.Vector.sub(attractor.location, this.location);
     var distance = forceDirection.mag();
-    forceDirection.normalize();
-    var magnitude = (gravConst * this.size * this.size) / (distance * distance);
-    var force = forceDirection.mult(magnitude);
+    return distance;
+  }
 
-    // make a call to apply force to velocity
-    applyForce(force);
+  this.getDistanceFromOrigin = function() {
+    var direction = p5.Vector.sub(this.origin, this.location);
+    var distanceFromOrigin = direction.mag();
+    return distanceFromOrigin;
+  }
+
+  this.returnToOrigin = function() {
+    this.location.set(this.origin);
   }
 
   this.update = function() {
+    this.velocity.add(this.acceleration);
     this.location.add(this.velocity);
   }
 
@@ -116,26 +132,17 @@ function Attractor(_locX, _locY, _size) {
     var distance = forceDirection.mag();
 
 
-    //attract object if it is in given range (attractor.range)
-    if (distance < this.range) {
-      // the constrain() method will prevent unwanted effects when the object gets to close to the center of the attractor.
-      distance = constrain(distance, 40, 300);
+    // the constrain() method will prevent unwanted effects when the object gets to close to the center of the attractor.
+    distance = constrain(distance, 40, 300);
 
-      // unsure what the pupurpose of normalize is, but it turns a vector into a number between 0.0 and 1.0 - kinda like map()
-      forceDirection.normalize();
+    // unsure what the pupurpose of normalize is, but it turns a vector into a number between 0.0 and 1.0 - kinda like map()
+    forceDirection.normalize();
 
-      // below is the equation for calculating the gravitational force of an object
-      var magnitude = (gravConst * this.size * obj.size) / (distance * distance);
-      var force = forceDirection.mult(magnitude);
-      return force;  // p5.Vector
-    }
+    // below is the equation for calculating the gravitational force of an object
+    var magnitude = (gravConst * this.size * obj.size) / (distance * distance);
+    var force = forceDirection.mult(magnitude);
 
-    if (distance > this.range) {
-
-      obj.location.x = obj.origin.x;
-      obj.location.y = obj.origin.y;
-    }
-
+    return force;  // p5.Vector
   }
 
 }
