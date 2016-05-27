@@ -1,17 +1,25 @@
 
 var gravConst = 1;
+var numberOfParticles = 10;
 var attractorRange = 50;
-var obj1;
-var obj2;
+
+var particleArray = [];
 var attractor;
 
 function setup() {
   var canvas = createCanvas(400, 400);
   background(0);
 
-  obj1 = new MoverObject(235, 300, 40, "Big");
-  obj2 = new MoverObject(100, 100, 30, "Small");
+  // instantiate attractor object
   attractor = new Attractor(250, 125, 60);
+
+  // build array of particle objects
+  for (var i = 0; i < numberOfParticles; i++) {
+    var locX = random(0, 400);
+    var locY = random(0, 400);
+    var size = random(10, 40);
+    particleArray.push(new MoverObject(locX, locY, size));
+  }
 
 }
 
@@ -22,18 +30,15 @@ function draw() {
   attractor.location.x = mouseX;
   attractor.location.y = mouseY;
   attractor.draw();
-  obj1.draw();
-  obj2.draw();
 
+  // updating the particles
+  for (var i = 0; i < particleArray.length; i++) {
+    particleArray[i].draw();
+    var force = attractor.attract(particleArray[i]);
+    particleArray[i].applyForce(force);
+    particleArray[i].update();
+  }
 
-  var force1 = attractor.attract(obj1);
-  var force2 = attractor.attract(obj2);
-
-
-  obj1.applyForce(force1);
-  obj1.update();
-  obj2.applyForce(force2);
-  obj2.update();
 }
 
 
