@@ -1,3 +1,4 @@
+
 var gravConst = 1;
 var attractorRange = 50;
 var obj1;
@@ -12,9 +13,6 @@ function setup() {
   obj2 = new MoverObject(100, 100, 30, "Small");
   attractor = new Attractor(250, 125, 60);
 
-  // obj1.origin.x = obj1.location.x;
-  // obj1.origin.y = obj1.location.y;
-
 }
 
 
@@ -27,16 +25,18 @@ function draw() {
   obj1.draw();
   obj2.draw();
 
+
   var force1 = attractor.attract(obj1);
   var force2 = attractor.attract(obj2);
 
-  // console.log(obj1.origin);
 
   obj1.applyForce(force1);
   obj1.update();
   obj2.applyForce(force2);
   obj2.update();
 }
+
+
 
 
 
@@ -57,6 +57,13 @@ function MoverObject(_locX, _locY, _size, _name) {
 
   this.applyForce = function(force) {
     this.velocity = force;
+    // console.log(this.name + " velocity: " + this.velocity);
+  }
+
+  this.returnToOrigin = function() {
+    var forceDirection = p5.Vector.sub(this.origin, this.location);
+    var distance = forceDirection.mag();
+
   }
 
   this.update = function() {
@@ -64,6 +71,12 @@ function MoverObject(_locX, _locY, _size, _name) {
   }
 
 }
+
+
+
+
+
+
 
 // *********************************************
 // ATTRACTOR CLASS
@@ -104,12 +117,11 @@ function Attractor(_locX, _locY, _size) {
       var force = forceDirection.mult(magnitude);
       return force;  // p5.Vector
     }
+
     if (distance > this.range) {
-      var originX = obj.origin.x;
-      var originY = obj.origin.y;
-      // console.log(obj.name + " Origin: " + obj.origin);
-      obj.location.x = originX;
-      obj.location.y = originY;
+
+      obj.location.x = obj.origin.x;
+      obj.location.y = obj.origin.y;
     }
 
   }
