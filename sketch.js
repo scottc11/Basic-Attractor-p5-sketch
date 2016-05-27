@@ -18,7 +18,7 @@ function setup() {
     var locX = random(0, 400);
     var locY = random(0, 400);
     var size = random(10, 40);
-    particleArray.push(new MoverObject(locX, locY, size));
+    particleArray.push(new Particle(locX, locY, size));
   }
 
 }
@@ -33,6 +33,7 @@ function draw() {
 
   // updating the particles
   for (var i = 0; i < particleArray.length; i++) {
+
     particleArray[i].draw();
     var force = attractor.attract(particleArray[i]);
     particleArray[i].applyForce(force);
@@ -46,9 +47,9 @@ function draw() {
 
 
 // *********************************************
-//MOVER CLASS
+//PARTICLE CLASS
 
-function MoverObject(_locX, _locY, _size, _name) {
+function Particle(_locX, _locY, _size, _name) {
   this.name = _name;
   this.location = new p5.Vector(_locX, _locY);
   this.origin = new p5.Vector(_locX, _locY);
@@ -60,15 +61,21 @@ function MoverObject(_locX, _locY, _size, _name) {
     ellipse(this.location.x, this.location.y, this.size, this.size);
   }
 
+  // Apply the given force returned from Attractor to the particles velocity
   this.applyForce = function(force) {
     this.velocity = force;
-    // console.log(this.name + " velocity: " + this.velocity);
   }
 
   this.returnToOrigin = function() {
+    // Force calculations
     var forceDirection = p5.Vector.sub(this.origin, this.location);
     var distance = forceDirection.mag();
+    forceDirection.normalize();
+    var magnitude = (gravConst * this.size * this.size) / (distance * distance);
+    var force = forceDirection.mult(magnitude);
 
+    // make a call to apply force to velocity
+    applyForce(force);
   }
 
   this.update = function() {
@@ -101,7 +108,7 @@ function Attractor(_locX, _locY, _size) {
     ellipse(this.location.x, this.location.y, this.size, this.size);
   }
 
-  // Returns a Vector to be applied to the MoverObject location/veleocity
+  // Returns a Vector to be applied to the Particle location/veleocity
   this.attract = function(obj) {
 
     // calculations for objects distance
